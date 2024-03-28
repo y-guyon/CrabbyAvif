@@ -253,7 +253,7 @@ fn parse_ftyp(stream: &mut IStream) -> AvifResult<FileTypeBox> {
 
 fn parse_hdlr(stream: &mut IStream) -> AvifResult<()> {
     // Section 8.4.3.2 of ISO/IEC 14496-12.
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     // unsigned int(32) pre_defined = 0;
     let predefined = stream.read_u32()?;
     if predefined != 0 {
@@ -283,7 +283,7 @@ fn parse_hdlr(stream: &mut IStream) -> AvifResult<()> {
 
 fn parse_iloc(stream: &mut IStream) -> AvifResult<ItemLocationBox> {
     // Section 8.11.3.1 of ISO/IEC 14496-12.
-    let (version, _flags) = stream.read_version_and_flags()?;
+    let version = stream.read_version_and_enforce_flags(0)?;
     if version > 2 {
         println!("Invalid version in iloc.");
         return Err(AvifError::BmffParseFailed);
@@ -359,7 +359,7 @@ fn parse_iloc(stream: &mut IStream) -> AvifResult<ItemLocationBox> {
 // Returns the primary item ID.
 fn parse_pitm(stream: &mut IStream) -> AvifResult<u32> {
     // Section 8.11.4.2 of ISO/IEC 14496-12.
-    let (version, _flags) = stream.read_version_and_flags()?;
+    let version = stream.read_version_and_enforce_flags(0)?;
     if version == 0 {
         // unsigned int(16) item_ID;
         Ok(stream.read_u16()? as u32)
@@ -371,7 +371,7 @@ fn parse_pitm(stream: &mut IStream) -> AvifResult<u32> {
 
 fn parse_ispe(stream: &mut IStream) -> AvifResult<ItemProperty> {
     // Section 6.5.3.2 of ISO/IEC 23008-12.
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     let ispe = ImageSpatialExtents {
         // unsigned int(32) image_width;
         width: stream.read_u32()?,
@@ -383,7 +383,7 @@ fn parse_ispe(stream: &mut IStream) -> AvifResult<ItemProperty> {
 
 fn parse_pixi(stream: &mut IStream) -> AvifResult<ItemProperty> {
     // Section 6.5.6.2 of ISO/IEC 23008-12.
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     let mut pixi = PixelInformation {
         // unsigned int (8) num_channels;
         plane_count: stream.read_u8()?,
@@ -514,7 +514,7 @@ fn parse_pasp(stream: &mut IStream) -> AvifResult<ItemProperty> {
 #[allow(non_snake_case)]
 fn parse_auxC(stream: &mut IStream) -> AvifResult<ItemProperty> {
     // Section 6.5.8.2 of ISO/IEC 23008-12.
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    let _flags = stream.enforce_version_and_read_flags(0)?;
     // string aux_type;
     let auxiliary_type = stream.read_c_string()?;
     // template unsigned int(8) aux_subtype[];
@@ -782,7 +782,7 @@ fn parse_infe(stream: &mut IStream) -> AvifResult<ItemInfo> {
 
 fn parse_iinf(stream: &mut IStream) -> AvifResult<Vec<ItemInfo>> {
     // Section 8.11.6.2 of ISO/IEC 14496-12.
-    let (version, _flags) = stream.read_version_and_flags()?;
+    let version = stream.read_version_and_enforce_flags(0)?;
     let entry_count: u32 = if version == 0 {
         // unsigned int(16) entry_count;
         stream.read_u16()? as u32
@@ -805,7 +805,7 @@ fn parse_iinf(stream: &mut IStream) -> AvifResult<Vec<ItemInfo>> {
 
 fn parse_iref(stream: &mut IStream) -> AvifResult<Vec<ItemReference>> {
     // Section 8.11.12.2 of ISO/IEC 14496-12.
-    let (version, _flags) = stream.read_version_and_flags()?;
+    let version = stream.read_version_and_enforce_flags(0)?;
     let mut iref: Vec<ItemReference> = Vec::new();
     // versions > 1 are not supported. ignore them.
     if version > 1 {
@@ -862,7 +862,7 @@ fn parse_idat(stream: &mut IStream) -> AvifResult<Vec<u8>> {
 
 fn parse_meta(stream: &mut IStream) -> AvifResult<MetaBox> {
     // Section 8.11.1.2 of ISO/IEC 14496-12.
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     let mut meta = MetaBox::default();
 
     // Parse the first hdlr box.
@@ -960,7 +960,7 @@ fn parse_tkhd(stream: &mut IStream, track: &mut Track) -> AvifResult<()> {
 }
 
 fn parse_mdhd(stream: &mut IStream, track: &mut Track) -> AvifResult<()> {
-    let (version, _flags) = stream.read_version_and_flags()?;
+    let version = stream.read_version_and_enforce_flags(0)?;
     if version == 1 {
         // unsigned int(64) creation_time;
         stream.skip_u64()?;
@@ -997,7 +997,7 @@ fn parse_stco(
     sample_table: &mut SampleTable,
     large_offset: bool,
 ) -> AvifResult<()> {
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     // unsigned int(32) entry_count;
     let entry_count = usize_from_u32(stream.read_u32()?)?;
     sample_table.chunk_offsets.reserve(entry_count);
@@ -1015,7 +1015,7 @@ fn parse_stco(
 }
 
 fn parse_stsc(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResult<()> {
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     // unsigned int(32) entry_count;
     let entry_count = usize_from_u32(stream.read_u32()?)?;
     sample_table.sample_to_chunk.reserve(entry_count);
@@ -1043,7 +1043,7 @@ fn parse_stsc(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResul
 }
 
 fn parse_stsz(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResult<()> {
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     // unsigned int(32) sample_size;
     let sample_size = stream.read_u32()?;
     // unsigned int(32) sample_count;
@@ -1063,7 +1063,7 @@ fn parse_stsz(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResul
 }
 
 fn parse_stss(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResult<()> {
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     // unsigned int(32) entry_count;
     let entry_count = usize_from_u32(stream.read_u32()?)?;
     sample_table.sync_samples.reserve(entry_count);
@@ -1076,7 +1076,7 @@ fn parse_stss(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResul
 }
 
 fn parse_stts(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResult<()> {
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    stream.enforce_version_and_flags(0, 0)?;
     // unsigned int(32) entry_count;
     let entry_count = usize_from_u32(stream.read_u32()?)?;
     sample_table.time_to_sample.reserve(entry_count);
@@ -1093,7 +1093,7 @@ fn parse_stts(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResul
 }
 
 fn parse_stsd(stream: &mut IStream, sample_table: &mut SampleTable) -> AvifResult<()> {
-    let (_version, _flags) = stream.read_and_enforce_version_and_flags(0)?;
+    let _version = stream.read_version_and_enforce_flags(0)?;
     // unsigned int(32) entry_count;
     let entry_count = usize_from_u32(stream.read_u32()?)?;
     sample_table.sample_descriptions.reserve(entry_count);

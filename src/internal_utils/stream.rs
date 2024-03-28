@@ -198,15 +198,32 @@ impl IStream<'_> {
         Ok((version, flags))
     }
 
-    pub fn read_and_enforce_version_and_flags(
-        &mut self,
-        enforced_version: u8,
-    ) -> AvifResult<(u8, u32)> {
+    pub fn read_version_and_enforce_flags(&mut self, enforced_flags: u32) -> AvifResult<u8> {
+        let (version, flags) = self.read_version_and_flags()?;
+        if flags != enforced_flags {
+            return Err(AvifError::BmffParseFailed);
+        }
+        Ok(version)
+    }
+
+    pub fn enforce_version_and_read_flags(&mut self, enforced_version: u8) -> AvifResult<u32> {
         let (version, flags) = self.read_version_and_flags()?;
         if version != enforced_version {
             return Err(AvifError::BmffParseFailed);
         }
-        Ok((version, flags))
+        Ok(flags)
+    }
+
+    pub fn enforce_version_and_flags(
+        &mut self,
+        enforced_version: u8,
+        enforced_flags: u32,
+    ) -> AvifResult<()> {
+        let (version, flags) = self.read_version_and_flags()?;
+        if version != enforced_version || flags != enforced_flags {
+            return Err(AvifError::BmffParseFailed);
+        }
+        Ok(())
     }
 
     pub fn skip(&mut self, size: usize) -> AvifResult<()> {
