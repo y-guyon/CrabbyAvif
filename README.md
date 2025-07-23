@@ -20,6 +20,9 @@ cd CrabbyAvif/sys/dav1d-sys
 # If libyuv system library can be found with pkg-config, this step can be skipped.
 cd ../libyuv-sys
 ./libyuv.cmd
+# If libyuv system library can be found with pkg-config, this step can be skipped.
+cd ../libsharpyuv-sys
+./libsharpyuv.cmd
 cd ../..
 cargo build
 ```
