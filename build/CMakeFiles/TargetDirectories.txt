@@ -1,0 +1,11 @@
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/testutil.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/decoder_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/encoder_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/gainmap_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/image_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/incremental_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/reformat_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/conformance_tests.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/test.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/edit_cache.dir
+/home/yguyon/git/CrabbyAvif/build/CMakeFiles/rebuild_cache.dir

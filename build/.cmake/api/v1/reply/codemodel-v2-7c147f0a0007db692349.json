@@ -1,0 +1,123 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "crabby_avif_c_api_tests",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "conformance_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-conformance_tests-Debug-d4e7d37bc589929f8f1c.json",
+					"name" : "conformance_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "decoder_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-decoder_tests-Debug-1f93f6e25df0192c35cb.json",
+					"name" : "decoder_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "encoder_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-encoder_tests-Debug-7a17a86586e6c75bce82.json",
+					"name" : "encoder_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "gainmap_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-gainmap_tests-Debug-726c646d31642c31833d.json",
+					"name" : "gainmap_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "image_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-image_tests-Debug-04d10e5a19c3ccf4471f.json",
+					"name" : "image_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "incremental_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-incremental_tests-Debug-d3b8b3e618d22471b018.json",
+					"name" : "incremental_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "reformat_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-reformat_tests-Debug-7525145a4015411b612a.json",
+					"name" : "reformat_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testutil::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testutil-Debug-084afd4603d8f00eb2f3.json",
+					"name" : "testutil",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/yguyon/git/CrabbyAvif/build",
+		"source" : "/home/yguyon/git/CrabbyAvif/c_api_tests"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

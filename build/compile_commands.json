@@ -1,0 +1,50 @@
+[
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/testutil.dir/testutil.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/testutil.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/testutil.cc",
+  "output": "CMakeFiles/testutil.dir/testutil.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/decoder_tests.dir/decoder_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/decoder_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/decoder_tests.cc",
+  "output": "CMakeFiles/decoder_tests.dir/decoder_tests.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/encoder_tests.dir/encoder_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/encoder_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/encoder_tests.cc",
+  "output": "CMakeFiles/encoder_tests.dir/encoder_tests.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/gainmap_tests.dir/gainmap_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/gainmap_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/gainmap_tests.cc",
+  "output": "CMakeFiles/gainmap_tests.dir/gainmap_tests.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/image_tests.dir/image_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/image_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/image_tests.cc",
+  "output": "CMakeFiles/image_tests.dir/image_tests.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/incremental_tests.dir/incremental_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/incremental_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/incremental_tests.cc",
+  "output": "CMakeFiles/incremental_tests.dir/incremental_tests.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/reformat_tests.dir/reformat_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/reformat_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/reformat_tests.cc",
+  "output": "CMakeFiles/reformat_tests.dir/reformat_tests.cc.o"
+},
+{
+  "directory": "/home/yguyon/git/CrabbyAvif/build",
+  "command": "clang++ -I/home/yguyon/git/CrabbyAvif/external/googletest/googletest/include -I/home/yguyon/git/CrabbyAvif/include -g -o CMakeFiles/conformance_tests.dir/conformance_tests.cc.o -c /home/yguyon/git/CrabbyAvif/c_api_tests/conformance_tests.cc",
+  "file": "/home/yguyon/git/CrabbyAvif/c_api_tests/conformance_tests.cc",
+  "output": "CMakeFiles/conformance_tests.dir/conformance_tests.cc.o"
+}
+]
