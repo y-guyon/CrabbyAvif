@@ -42,6 +42,7 @@ use crate::parser::mp4box;
 use crate::parser::mp4box::*;
 use crate::parser::obu::Av1SequenceHeader;
 use crate::utils::pixels::ChannelIdc;
+use crate::utils::pixels::Pixels;
 use crate::*;
 
 use std::cmp::max;
@@ -438,7 +439,7 @@ impl GridImageHelper<'_> {
         self.image
             .copy_from_tile(cell_image, self.grid, self.cell_index as u32, self.category)?;
         if self.cell_index == 0 {
-            self.first_cell_image = Some(cell_image.clone_properties());
+            self.first_cell_image = Some(cell_image.shallow_clone());
         }
         self.cell_index += 1;
         Ok(())
@@ -1836,9 +1837,11 @@ impl Decoder {
                 category,
             )?;
         } else {
-            // Non grid/overlay path, steal or copy planes from the only tile.
+            // Non-grid, non-overlay path.
+
             match category {
                 Category::Color | Category::Gainmap => {
+                    // The only tile is the whole image. Copy the image features.
                     dst_image.width = tile.image.width;
                     dst_image.height = tile.image.height;
                     dst_image.copy_properties_from(&tile.image, &tile.codec_config);
@@ -1850,13 +1853,38 @@ impl Decoder {
                 }
             }
 
+            // Steal or copy the planes from the only tile.
             for plane in category.planes() {
                 let plane = plane.as_usize();
-                (dst_image.planes[plane], dst_image.row_bytes[plane]) = match &tile.image.planes
-                    [plane]
-                {
-                    Some(src_plane) => (Some(src_plane.try_clone()?), tile.image.row_bytes[plane]),
-                    None => (None, 0),
+                if let Some(src_plane) = &tile.image.planes[plane] {
+                    dst_image.planes[plane] = Some(match src_plane {
+                        // The only tile is the whole image.
+                        // The memory is owned by the underlying codec.
+                        // It will stay valid until the next frame or until the
+                        // Decoder instance is destroyed. Decoder::image and
+                        // Decoder::gainmap::image can just point to that
+                        // memory. This is fine because the user can only access
+                        // that memory through read-only Decoder::image() and
+                        // Decoder::gainmap(), and the lifetimes of the returned
+                        // references cannot exceed Decoder::next_image()
+                        // (because it modifies the Decoder instance) and
+                        // similar other API calls, and cannot exceed the
+                        // Decoder instance's lifetime.
+                        Pixels::Pointer(p) => Pixels::Pointer(*p),
+                        Pixels::Pointer16(p) => Pixels::Pointer16(*p),
+                        // SAFETY: Limited lifetime and read-only access.
+                        Pixels::Buffer(b) => Pixels::Pointer(unsafe {
+                            PointerSlice::create(b.as_ptr() as *mut _, b.len())?
+                        }),
+                        // SAFETY: Limited lifetime and read-only access.
+                        Pixels::Buffer16(b) => Pixels::Pointer16(unsafe {
+                            PointerSlice::create(b.as_ptr() as *mut _, b.len())?
+                        }),
+                    });
+                    dst_image.row_bytes[plane] = tile.image.row_bytes[plane];
+                } else {
+                    dst_image.planes[plane] = None;
+                    dst_image.row_bytes[plane] = 0;
                 }
             }
         }
