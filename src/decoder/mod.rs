@@ -42,6 +42,7 @@ use crate::parser::mp4box;
 use crate::parser::mp4box::*;
 use crate::parser::obu::Av1SequenceHeader;
 use crate::utils::pixels::ChannelIdc;
+use crate::utils::pixels::Pixels;
 use crate::*;
 
 use std::cmp::max;
@@ -1760,6 +1761,10 @@ impl Decoder {
         };
 
         if self.tile_info[decoding_item.usize()].is_grid() {
+            if self.tile_info[decoding_item.usize()].is_overlay() {
+                return AvifError::not_implemented();
+            }
+
             if tile_index == 0 {
                 let grid = &self.tile_info[decoding_item.usize()].grid;
                 validate_grid_image_dimensions(&tile.image, grid)?;
@@ -1836,9 +1841,11 @@ impl Decoder {
                 category,
             )?;
         } else {
-            // Non grid/overlay path, steal or copy planes from the only tile.
+            // Non-grid, non-overlay path.
+
             match category {
                 Category::Color | Category::Gainmap => {
+                    // The only tile is the whole image. Copy the image features.
                     dst_image.width = tile.image.width;
                     dst_image.height = tile.image.height;
                     dst_image.copy_properties_from(&tile.image, &tile.codec_config);
@@ -1850,13 +1857,40 @@ impl Decoder {
                 }
             }
 
+            // The only tile is the whole image. The memory is owned by the
+            // underlying codec or its CrabbyAvif wrapper. It will stay valid
+            // until the next frame or until the Decoder instance destruction.
+            // dst_image can just point to that memory.
+            //
+            // If dst_image is Decoder::image or Decoder::gainmap::image:
+            //   The user can only access that memory through read-only
+            //   Decoder::image() and Decoder::gainmap(), and the lifetimes of
+            //   the returned references cannot exceed Decoder::next_image() nor
+            //   the Decoder instance's own lifetime (and thus its codecs').
+            //
+            // If there are Sample Transforms:
+            //   dst_image is Decoder::extra_inputs with its own codec instance.
+            //   All of the tiles are combined in apply_sample_transform() into
+            //   Decoder::image which owns its buffer.
             for plane in category.planes() {
                 let plane = plane.as_usize();
-                (dst_image.planes[plane], dst_image.row_bytes[plane]) = match &tile.image.planes
-                    [plane]
-                {
-                    Some(src_plane) => (Some(src_plane.try_clone()?), tile.image.row_bytes[plane]),
-                    None => (None, 0),
+                if let Some(src_plane) = &tile.image.planes[plane] {
+                    dst_image.planes[plane] = Some(match src_plane {
+                        Pixels::Pointer(p) => Pixels::Pointer(*p),
+                        Pixels::Pointer16(p) => Pixels::Pointer16(*p),
+                        // SAFETY: Bounded lifetime and read-only access.
+                        Pixels::Buffer(b) => Pixels::Pointer(unsafe {
+                            PointerSlice::create(b.as_ptr() as *mut _, b.len())?
+                        }),
+                        // SAFETY: Bounded lifetime and read-only access.
+                        Pixels::Buffer16(b) => Pixels::Pointer16(unsafe {
+                            PointerSlice::create(b.as_ptr() as *mut _, b.len())?
+                        }),
+                    });
+                    dst_image.row_bytes[plane] = tile.image.row_bytes[plane];
+                } else {
+                    dst_image.planes[plane] = None;
+                    dst_image.row_bytes[plane] = 0;
                 }
             }
         }
