@@ -39,6 +39,20 @@ pub fn get_decoder(filename: &str) -> decoder::Decoder {
     decoder
 }
 
+pub fn read_image(path: &str) -> AvifResult<Image> {
+    use crabby_avif::utils::reader::{Config, Reader};
+    Ok(<dyn Reader>::create(path)?
+        .read_frame(&Config::default())?
+        .0)
+}
+
+#[cfg(feature = "png")]
+pub fn write_png(image: &Image, filename: &str) -> AvifResult<()> {
+    use crabby_avif::utils::writer::{png::PngWriter, Writer};
+    let mut file = std::fs::File::create(filename).unwrap();
+    PngWriter::default().write_frame(&mut file, image)
+}
+
 fn full_to_limited_pixel(min: u32, max: u32, full: u32, v: u16) -> u16 {
     let v = v as u32;
     let v = (((v * (max - min)) + (full / 2)) / full) + min;
@@ -319,3 +333,11 @@ pub const HAS_DECODER: bool = cfg!(any(feature = "dav1d", feature = "android_med
 pub const HAS_NON_ANDROID_DECODER: bool = cfg!(feature = "dav1d");
 
 pub const HAS_ENCODER: bool = cfg!(feature = "aom");
+
+#[test]
+fn read_image_avif_test() -> AvifResult<()> {
+    if HAS_DECODER {
+        read_image(&get_test_file("alpha.avif"))?;
+    }
+    Ok(())
+}
