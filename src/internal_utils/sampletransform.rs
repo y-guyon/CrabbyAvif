@@ -142,12 +142,12 @@ impl SampleTransformToken {
                     StackItem::Constant(c) => StackItem::Constant(op.apply(c, bounds)),
                     StackItem::ImageItem(item_idx) => {
                         if extra_inputs[item_idx].depth == 8 {
-                            let row8 = extra_inputs[item_idx].row_exact(plane, y)?;
+                            let row8 = extra_inputs[item_idx].row(plane, y)?;
                             StackItem::Values(
                                 row8.iter().map(|v| op.apply(*v as i64, bounds)).collect(),
                             )
                         } else {
-                            let row16 = extra_inputs[item_idx].row16_exact(plane, y)?;
+                            let row16 = extra_inputs[item_idx].row16(plane, y)?;
                             StackItem::Values(
                                 row16.iter().map(|v| op.apply(*v as i64, bounds)).collect(),
                             )
@@ -375,13 +375,13 @@ impl SampleTransform {
                 }
                 StackItem::Constant(c) => {
                     if output.depth == 8 {
-                        let output_row8 = output.row_exact_mut(plane, y)?;
+                        let output_row8 = output.row_mut(plane, y)?;
                         let c8 = c.clamp(output_min as i64, output_max as i64) as u8;
                         for v in output_row8.iter_mut() {
                             *v = c8;
                         }
                     } else {
-                        let output_row16 = output.row16_exact_mut(plane, y)?;
+                        let output_row16 = output.row16_mut(plane, y)?;
                         let c16 = c.clamp(output_min as i64, output_max as i64) as u16;
                         for v in output_row16.iter_mut() {
                             *v = c16;
@@ -392,12 +392,12 @@ impl SampleTransform {
                     if output.depth == extra_inputs[item_idx].depth {
                         if output.depth == 8 {
                             output
-                                .row_exact_mut(plane, y)?
-                                .copy_from_slice(extra_inputs[item_idx].row_exact(plane, y)?);
+                                .row_mut(plane, y)?
+                                .copy_from_slice(extra_inputs[item_idx].row(plane, y)?);
                         } else {
                             output
-                                .row16_exact_mut(plane, y)?
-                                .copy_from_slice(extra_inputs[item_idx].row16_exact(plane, y)?);
+                                .row16_mut(plane, y)?
+                                .copy_from_slice(extra_inputs[item_idx].row16(plane, y)?);
                         }
                     } else if output.depth == 8 && extra_inputs[item_idx].depth > 8 {
                         let input_row16 = extra_inputs[item_idx].row16(plane, y)?;

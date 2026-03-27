@@ -100,10 +100,10 @@ pub struct Image {
 }
 
 pub struct PlaneData {
-    pub width: u32,
-    pub height: u32,
-    pub row_bytes: u32,
-    pub pixel_size: u32,
+    pub width: u32,      // Number of pixel columns. Possibly fewer than in the luma plane.
+    pub height: u32,     // Number of pixel rows. Possibly fewer than in the luma plane.
+    pub row_bytes: u32, // Offset from one pixel row to the next row in bytes. May include row padding.
+    pub pixel_size: u32, // Offset from one pixel to the next pixel in bytes.
 }
 
 impl Image {
@@ -235,62 +235,34 @@ impl Image {
 
     pub fn row(&self, plane: Plane, row: u32) -> AvifResult<&[u8]> {
         let plane_data = self.plane_data(plane).ok_or(AvifError::NoContent)?;
-        let row_bytes = plane_data.row_bytes;
-        let start = checked_mul!(row, row_bytes)?;
+        let start = checked_mul!(row, plane_data.row_bytes)?;
         self.planes[plane.as_usize()]
             .unwrap_ref()
-            .slice(start, row_bytes)
-    }
-
-    // Same as row() but only returns `width` pixels (extra row padding is excluded).
-    pub fn row_exact(&self, plane: Plane, row: u32) -> AvifResult<&[u8]> {
-        let width = self.width(plane);
-        Ok(&self.row(plane, row)?[0..width])
+            .slice(start, plane_data.width)
     }
 
     pub fn row_mut(&mut self, plane: Plane, row: u32) -> AvifResult<&mut [u8]> {
         let plane_data = self.plane_data(plane).ok_or(AvifError::NoContent)?;
-        let row_bytes = plane_data.row_bytes;
-        let start = checked_mul!(row, row_bytes)?;
+        let start = checked_mul!(row, plane_data.row_bytes)?;
         self.planes[plane.as_usize()]
             .unwrap_mut()
-            .slice_mut(start, row_bytes)
-    }
-
-    // Same as row_mut() but only returns `width` pixels (extra row padding is excluded).
-    pub fn row_exact_mut(&mut self, plane: Plane, row: u32) -> AvifResult<&mut [u8]> {
-        let width = self.width(plane);
-        Ok(&mut self.row_mut(plane, row)?[0..width])
+            .slice_mut(start, plane_data.width)
     }
 
     pub fn row16(&self, plane: Plane, row: u32) -> AvifResult<&[u16]> {
         let plane_data = self.plane_data(plane).ok_or(AvifError::NoContent)?;
-        let row_bytes = plane_data.row_bytes / 2;
-        let start = checked_mul!(row, row_bytes)?;
+        let start = checked_mul!(row, plane_data.row_bytes / 2)?;
         self.planes[plane.as_usize()]
             .unwrap_ref()
-            .slice16(start, row_bytes)
-    }
-
-    // Same as row16() but only returns `width` pixels (extra row padding is excluded).
-    pub fn row16_exact(&self, plane: Plane, row: u32) -> AvifResult<&[u16]> {
-        let width = self.width(plane);
-        Ok(&self.row16(plane, row)?[0..width])
+            .slice16(start, plane_data.width)
     }
 
     pub fn row16_mut(&mut self, plane: Plane, row: u32) -> AvifResult<&mut [u16]> {
         let plane_data = self.plane_data(plane).ok_or(AvifError::NoContent)?;
-        let row_bytes = plane_data.row_bytes / 2;
-        let start = checked_mul!(row, row_bytes)?;
+        let start = checked_mul!(row, plane_data.row_bytes / 2)?;
         self.planes[plane.as_usize()]
             .unwrap_mut()
-            .slice16_mut(start, row_bytes)
-    }
-
-    // Same as row16_mut() but only returns `width` pixels (extra row padding is excluded).
-    pub fn row16_exact_mut(&mut self, plane: Plane, row: u32) -> AvifResult<&mut [u16]> {
-        let width = self.width(plane);
-        Ok(&mut self.row16_mut(plane, row)?[0..width])
+            .slice16_mut(start, plane_data.width)
     }
 
     // Returns a view with the same image properties as self and pointing to
@@ -450,7 +422,7 @@ impl Image {
             };
             if self.depth == 8 {
                 for y in 0..src_plane.height {
-                    let src_row = image.row_exact(plane, y)?;
+                    let src_row = image.row(plane, y)?;
                     let dst_row = self.row_mut(plane, y)?;
                     let dst_slice = &mut dst_row[0..src_row.len()];
                     dst_slice.copy_from_slice(src_row);
@@ -459,7 +431,7 @@ impl Image {
                 }
             } else {
                 for y in 0..src_plane.height {
-                    let src_row = image.row16_exact(plane, y)?;
+                    let src_row = image.row16(plane, y)?;
                     let dst_row = self.row16_mut(plane, y)?;
                     let dst_slice = &mut dst_row[0..src_row.len()];
                     dst_slice.copy_from_slice(src_row);
@@ -495,14 +467,14 @@ impl Image {
             let opaque_value = self.max_channel();
             if self.depth == 8 {
                 for y in 0..plane_data.height {
-                    let row = self.row_exact(Plane::A, y).unwrap();
+                    let row = self.row(Plane::A, y).unwrap();
                     if !row.iter().all(|pixel| *pixel == opaque_value as u8) {
                         return false;
                     }
                 }
             } else {
                 for y in 0..plane_data.height {
-                    let row = self.row16_exact(Plane::A, y).unwrap();
+                    let row = self.row16(Plane::A, y).unwrap();
                     if !row.iter().all(|pixel| *pixel == opaque_value) {
                         return false;
                     }
@@ -516,14 +488,12 @@ impl Image {
         if let Some(plane_data) = self.plane_data(plane) {
             if self.depth == 8 {
                 for y in 0..plane_data.height {
-                    let row =
-                        &mut self.row_exact_mut(plane, y).unwrap()[..plane_data.width as usize];
+                    let row = &mut self.row_mut(plane, y).unwrap()[..plane_data.width as usize];
                     row.fill(value as u8);
                 }
             } else {
                 for y in 0..plane_data.height {
-                    let row =
-                        &mut self.row16_exact_mut(plane, y).unwrap()[..plane_data.width as usize];
+                    let row = &mut self.row16_mut(plane, y).unwrap()[..plane_data.width as usize];
                     row.fill(value);
                 }
             }
