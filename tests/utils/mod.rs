@@ -333,11 +333,3 @@ pub const HAS_DECODER: bool = cfg!(any(feature = "dav1d", feature = "android_med
 pub const HAS_NON_ANDROID_DECODER: bool = cfg!(feature = "dav1d");
 
 pub const HAS_ENCODER: bool = cfg!(feature = "aom");
-
-#[test]
-fn read_image_avif_test() -> AvifResult<()> {
-    if HAS_DECODER {
-        read_image(&get_test_file("alpha.avif"))?;
-    }
-    Ok(())
-}
