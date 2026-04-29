@@ -176,7 +176,7 @@ TEST(DecoderTest, OneShotDecodeMemory) {
 
 avifResult io_read(struct avifIO* io, uint32_t flags, uint64_t offset,
                    size_t size, avifROData* out) {
-  avifROData* src = (avifROData*)io->data;
+  avifROData* src = reinterpret_cast<avifROData*>(io->data);
   if (flags != 0 || offset > src->size) {
     return AVIF_RESULT_IO_ERROR;
   }
@@ -200,7 +200,7 @@ TEST(DecoderTest, OneShotDecodeCustomIO) {
                .read = io_read,
                .sizeHint = data.size(),
                .persistent = false,
-               .data = static_cast<void*>(&ro_data)};
+               .data = &ro_data};
   DecoderPtr decoder(avifDecoderCreate());
   ASSERT_NE(decoder, nullptr);
   avifDecoderSetIO(decoder.get(), &io);
@@ -825,7 +825,7 @@ TEST(DecoderTest, SetCustomIO) {
                .read = io_read,
                .sizeHint = data.size(),
                .persistent = false,
-               .data = static_cast<void*>(&ro_data)};
+               .data = &ro_data};
   // |io| must outlive the decoder.
   DecoderPtr decoder(avifDecoderCreate());
   ASSERT_NE(decoder, nullptr);
@@ -850,7 +850,7 @@ struct NonPersistentIO {
 // previous read call to ensure non-persistent IO.
 avifResult non_persistent_read(struct avifIO* io, uint32_t flags,
                                uint64_t offset, size_t size, avifROData* out) {
-  NonPersistentIO* io_data = (NonPersistentIO*)io->data;
+  NonPersistentIO* io_data = reinterpret_cast<NonPersistentIO*>(io->data);
   if (flags != 0 || offset > io_data->ro_data.size) {
     return AVIF_RESULT_IO_ERROR;
   }
@@ -882,7 +882,7 @@ TEST(DecoderTest, NonPersistentIO_Bug506387278) {
                .read = non_persistent_read,
                .sizeHint = data.size(),
                .persistent = false,
-               .data = static_cast<void*>(&io_data)};
+               .data = &io_data};
   // |io| must outlive the decoder.
   DecoderPtr decoder(avifDecoderCreate());
   ASSERT_NE(decoder, nullptr);
