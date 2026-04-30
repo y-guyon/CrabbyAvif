@@ -870,7 +870,7 @@ avifResult non_persistent_read(struct avifIO* io, uint32_t flags,
   return AVIF_RESULT_OK;
 }
 
-TEST(DecoderTest, NonPersistentIO_Bug506387278) {
+TEST(DecoderTest, NonPersistentIOBug506387278) {
 #ifdef __ANDROID__
   // Android MediaCodec does not support decoding this constructed poc file.
   GTEST_SKIP() << "Unsupported test on Android.";
