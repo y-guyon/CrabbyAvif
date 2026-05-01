@@ -886,6 +886,13 @@ impl Decoder {
             if !source_items.iter().all(|item| item.is_image_codec_item()) {
                 return AvifError::invalid_image_grid("invalid overlay items");
             }
+        } else if item.is_identity_item() {
+            if source_items.len() != 1 {
+                return AvifError::bmff_parse_failed(format!(
+                    "invalid dimg items found for iden (expected 1 found {})",
+                    source_items.len()
+                ));
+            }
         } else if item.is_tone_mapped_item() {
             if source_items.len() != 2 {
                 return AvifError::invalid_tone_mapped_image("expected tmap to have 2 dimg items");
@@ -1130,12 +1137,25 @@ impl Decoder {
                 let mut item_ids: [u32; DecodingItem::COUNT] = [0; DecodingItem::COUNT];
 
                 // Mandatory color item (primary item).
-                let primary_item_id = self.find_and_parse_item(
+                let mut primary_item_id = self.find_and_parse_item(
                     avif_boxes.meta.primary_item_id,
                     DecodingItem::COLOR,
                     &avif_boxes.ftyp,
                     &avif_boxes.meta,
                 )?;
+                loop {
+                    let primary_item = self.items.get(&primary_item_id).unwrap();
+                    if !primary_item.is_identity_item() {
+                        break;
+                    }
+                    let properties = primary_item.properties.clone();
+                    // Set the primary item to that of the derived item and copy over the
+                    // transformative properties.
+                    primary_item_id = primary_item.source_item_ids[0];
+                    let primary_item = self.items.get_mut(&primary_item_id).unwrap();
+                    primary_item.replace_transformative_properties_from(&properties)?;
+                }
+
                 item_ids[DecodingItem::COLOR.usize()] = primary_item_id;
 
                 let primary_item = self.items.get(&primary_item_id).unwrap();
@@ -1491,7 +1511,23 @@ impl Decoder {
             self.settings.image_size_limit,
             self.settings.image_dimension_limit,
         )?;
-        self.validate_source_items(item_id, &self.tile_info[decoding_item.usize()])
+        self.validate_source_items(item_id, &self.tile_info[decoding_item.usize()])?;
+        let mut item = self.items.get(&item_id).unwrap();
+        let mut parsed_item_ids = vec![item_id];
+        loop {
+            if !item.is_identity_item() {
+                break;
+            }
+            let sub_item_id = item.source_item_ids[0];
+            if parsed_item_ids.contains(&sub_item_id) {
+                return AvifError::invalid_image_grid("found a cycle in identity derived items");
+            }
+            self.populate_source_item_ids(sub_item_id)?;
+            self.validate_source_items(sub_item_id, &self.tile_info[decoding_item.usize()])?;
+            parsed_item_ids.push(sub_item_id);
+            item = self.items.get(&sub_item_id).unwrap();
+        }
+        Ok(())
     }
 
     fn can_use_single_codec(&self) -> AvifResult<bool> {
