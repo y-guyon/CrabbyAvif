@@ -422,8 +422,6 @@ impl Item {
             || self.has_unsupported_essential_property
             // Probably Exif/XMP or some other data.
             || !self.is_image_item()
-            // libavif does not support thumbnails.
-            || self.thumbnail_for_id != 0
     }
 
     fn is_metadata(&self, item_type: &str, color_id: Option<u32>) -> bool {
